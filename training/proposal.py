@@ -26,8 +26,7 @@ from common.coco_val_dataset import COCOvalDataset
 from common.utils import non_max_suppression, bbox_iou
 
 
-# prefix = 'Baseline'
-prefix = 'Test'
+prefix = 'ATTN'
 
 logger = logging.getLogger('logger')
 logger.setLevel(logging.DEBUG)
@@ -114,11 +113,8 @@ def train(config):
     net = ProposalAttention(config, is_training=is_training)
     net.train(is_training)
 
-    # Optimizer and learning rate
+    # Optimizer
     optimizer = _get_optimizer(config, net)
-    # lr_scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=config["lr"]["decay_step"],
-    #                                          gamma=config["lr"]["decay_gamma"])
-    lr_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=5, eta_min=1e-04)
 
     # Set data parallel
     net = nn.DataParallel(net)
@@ -152,6 +148,10 @@ def train(config):
     coco_val_loader = torch.utils.data.DataLoader(coco_val_dataset, batch_size=8,
                                                   shuffle=False, num_workers=4, pin_memory=True)
 
+    # Learning rate
+    # lr_scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=config["lr"]["decay_step"], gamma=config["lr"]["decay_gamma"])
+    lr_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=int(4), eta_min=(0.1 * config["lr"]["other_lr"]))
+
     # Start the training loop
     logger.info("Start training.")
     for epoch in range(config["epochs"]):
@@ -163,7 +163,7 @@ def train(config):
         # optimizer.zero_grad()
         # ---------------------- #
         avg_loss = 0
-        lr_scheduler.step()
+        # lr_scheduler.step()
         for step, samples in enumerate(coco_train_loader):
             images, labels = samples["image"], samples["label"]
             start_time = time.time()
@@ -199,7 +199,7 @@ def train(config):
             #     optimizer.zero_grad()
             # ---------------------- #
 
-            if step > 0 and step % 400 == 0:  # 400 for mini-batch:64, 1000 for mini-batch:16
+            if step > 0 and step % 400 == 0:  # 400 for mini-batch:64
                 _loss = loss.item()
                 duration = float(time.time() - start_time)
                 example_per_second = config["batch_size"] / duration
@@ -215,10 +215,12 @@ def train(config):
                 for i, name in enumerate(losses_name):
                     value = _loss if i == 0 else losses[i]
                     config["tensorboard_writer"].add_scalar(name, value, config["global_step"])
-
+            lr_scheduler.step()
         logger.info("Training average loss = %.6f" % (avg_loss / len(coco_train_loader)))
 
         _save_checkpoint(net.state_dict(), config, name="Ep%04d-model.pth" % epoch)
+
+        lr_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=int(4), eta_min=(0.1 * config["lr"]["other_lr"]))
 
         """ VALIDATION """
         # if epoch % 2 == 0:
