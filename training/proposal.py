@@ -150,7 +150,7 @@ def train(config):
 
     # Learning rate
     # lr_scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=config["lr"]["decay_step"], gamma=config["lr"]["decay_gamma"])
-    lr_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=int(4), eta_min=(0.1 * config["lr"]["other_lr"]))
+    lr_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=4, eta_min=(0.1 * config["lr"]["other_lr"]))
 
     # Start the training loop
     logger.info("Start training.")
@@ -220,7 +220,7 @@ def train(config):
 
         _save_checkpoint(net.state_dict(), config, name="Ep%04d-model.pth" % epoch)
 
-        lr_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=int(4), eta_min=(0.1 * config["lr"]["other_lr"]))
+        lr_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=4, eta_min=(0.1 * config["lr"]["other_lr"]))
 
         """ VALIDATION """
         # if epoch % 2 == 0:
