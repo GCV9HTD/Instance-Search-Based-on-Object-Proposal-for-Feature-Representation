@@ -26,7 +26,9 @@ from common.coco_val_dataset import COCOvalDataset
 from common.utils import non_max_suppression, bbox_iou
 
 
-prefix = 'ATTN'
+# prefix = 'ATOP'
+prefix = 'Megvii'
+# prefix = 'Test'
 
 logger = logging.getLogger('logger')
 logger.setLevel(logging.DEBUG)
@@ -142,11 +144,11 @@ def train(config):
     # DataLoader
     coco_train_dataset = COCOtrnDataset(config["train_path"], (config["img_w"], config["img_h"]))
     coco_train_loader = torch.utils.data.DataLoader(coco_train_dataset, batch_size=config["batch_size"],
-                                                    shuffle=True, num_workers=4, pin_memory=True)
+                                                    shuffle=True, num_workers=4, pin_memory=False)
 
     coco_val_dataset = COCOvalDataset(config["val_path"], (config["img_w"], config["img_h"]))
-    coco_val_loader = torch.utils.data.DataLoader(coco_val_dataset, batch_size=8,
-                                                  shuffle=False, num_workers=4, pin_memory=True)
+    coco_val_loader = torch.utils.data.DataLoader(coco_val_dataset, batch_size=32,
+                                                  shuffle=False, num_workers=4, pin_memory=False)
 
     # Learning rate
     # lr_scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=config["lr"]["decay_step"], gamma=config["lr"]["decay_gamma"])
@@ -162,8 +164,11 @@ def train(config):
         # Method 2
         # optimizer.zero_grad()
         # ---------------------- #
-        avg_loss = 0
+
+        # ---------------------- #
         # lr_scheduler.step()
+        # ---------------------- #
+        avg_loss = 0
         for step, samples in enumerate(coco_train_loader):
             images, labels = samples["image"], samples["label"]
             start_time = time.time()
@@ -198,7 +203,6 @@ def train(config):
             #     optimizer.step()
             #     optimizer.zero_grad()
             # ---------------------- #
-
             if step > 0 and step % 400 == 0:  # 400 for mini-batch:64
                 _loss = loss.item()
                 duration = float(time.time() - start_time)
@@ -215,17 +219,18 @@ def train(config):
                 for i, name in enumerate(losses_name):
                     value = _loss if i == 0 else losses[i]
                     config["tensorboard_writer"].add_scalar(name, value, config["global_step"])
+            #---------------------
             lr_scheduler.step()
+            # --------------------
         logger.info("Training average loss = %.6f" % (avg_loss / len(coco_train_loader)))
 
         _save_checkpoint(net.state_dict(), config, name="Ep%04d-model.pth" % epoch)
 
-        lr_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=4, eta_min=(0.1 * config["lr"]["other_lr"]))
+        # ---------------------
+        lr_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=4, eta_min=(0.1 * optimizer.param_groups[0]['lr']))
+        # ---------------------
 
         """ VALIDATION """
-        # if epoch % 2 == 0:
-        #     continue
-
         logger.info("Validating ... ")
         total = 0.0
         proposal = 0.0
