@@ -57,7 +57,7 @@ def json2txt(annotation_file, path):
         bbox[2] = bbox[2] / imgs[idx][2]
         bbox[3] = bbox[3] / imgs[idx][1]
 
-        bbox.insert(0, cate_id)
+        bbox.insert(0, cate_id - 1)  # such that index starts from 0
         imgs[idx].append(bbox)
 
     for i in range(len(imgs)):
