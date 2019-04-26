@@ -72,6 +72,20 @@ def json2txt(annotation_file, path):
         strm.close()
 
 
+
+def names(annotation_file, file):
+    dataset = json.load(open(annotation_file, 'r'))
+    cate = dataset['categories']
+    maps = dict()
+
+    for i in range(len(cate)):
+        maps[cate[i][u'id']] = cate[i][u'name'].encode("utf-8")
+    strm = open(file, 'w')
+    for i in range(len(cate)):
+        strm.write('%s\n' % maps[i+1])
+    strm.close()        
+
+
 def check():
     fn = '/home/yeezy/Dat/Megvii/train.txt'
 
