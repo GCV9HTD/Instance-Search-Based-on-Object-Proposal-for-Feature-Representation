@@ -112,10 +112,20 @@ if __name__ == "__main__":
     # txt_file = '/home/yeezy/Desktop/5k.txt'
     # xtxt(label_dir, txt_file)
 
+    # Megvii
     # label_dir = '/home/yz/cde/ProposalYOLO/data/megvii/labels/val/'
     # txt_file = '/home/yz/cde/ProposalYOLO/data/megvii/val.txt'
     # xtxt(label_dir, txt_file)
 
-    label_dir = '/home/yz/cde/ProposalYOLO/data/megvii/labels/train/'
-    txt_file = '/home/yz/cde/ProposalYOLO/data/megvii/train.txt'
+    # label_dir = '/home/yz/cde/ProposalYOLO/data/megvii/labels/train/'
+    # txt_file = '/home/yz/cde/ProposalYOLO/data/megvii/train.txt'
+    # xtxt(label_dir, txt_file)
+
+    # Tiny Megvii
+    label_dir = '/home/yz/cde/ProposalYOLO/data/tiny_megvii/labels/val/'
+    txt_file = '/home/yz/cde/ProposalYOLO/data/tiny_megvii/val.txt'
+    xtxt(label_dir, txt_file)
+
+    label_dir = '/home/yz/cde/ProposalYOLO/data/tiny_megvii/labels/train/'
+    txt_file = '/home/yz/cde/ProposalYOLO/data/tiny_megvii/train.txt'
     xtxt(label_dir, txt_file)

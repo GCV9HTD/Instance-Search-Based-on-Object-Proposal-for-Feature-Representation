@@ -72,7 +72,6 @@ def json2txt(annotation_file, path):
         strm.close()
 
 
-
 def names(annotation_file, file):
     dataset = json.load(open(annotation_file, 'r'))
     cate = dataset['categories']
@@ -83,8 +82,7 @@ def names(annotation_file, file):
     strm = open(file, 'w')
     for i in range(len(cate)):
         strm.write('%s\n' % maps[i+1])
-    strm.close()        
-
+    strm.close()
 
 def check():
     fn = '/home/yeezy/Dat/Megvii/train.txt'
@@ -139,16 +137,51 @@ def check():
             boxes_list.append(boxes)
 
 
+def copy(txt_path, src_path, dst_path):
+    img_list = os.listdir(txt_path)
+    for file in img_list:
+        name = file.replace('txt', 'jpg')
+        src_file = os.path.join(src_path, name)
+        dst_file = os.path.join(dst_path, name)
+        os.symlink(src_file, dst_file)
+
+
 if __name__ == "__main__":
 
+    # Megvii
     # annotation_file = '/home/yz/cde/ProposalYOLO/data/megvii/val.json'
     # path = '/home/yz/cde/ProposalYOLO/data/megvii/labels/val/'
     # json2txt(annotation_file, path)
+    #
+    # annotation_file = '/home/yz/cde/ProposalYOLO/data/megvii/train.json'
+    # path = '/home/yz/cde/ProposalYOLO/data/megvii/labels/train/'
+    # json2txt(annotation_file, path)
 
-    annotation_file = '/home/yz/cde/ProposalYOLO/data/megvii/train.json'
-    path = '/home/yz/cde/ProposalYOLO/data/megvii/labels/train/'
-    json2txt(annotation_file, path)
+    # annotation_file = '/home/yz/cde/ProposalYOLO/data/megvii/val.json'
+    # names(annotation_file, '/home/yz/cde/ProposalYOLO/data/megvii/megvii.names')
 
     # check()
+
+    # Tiny Megvii
+    # annotation_file = '/media/data1/lzhang/tiny_megvii/annotations/tiny_val.json'
+    # path = '/home/yz/cde/ProposalYOLO/data/tiny_megvii/labels/val/'
+    # json2txt(annotation_file, path)
+
+    # annotation_file = '/media/data1/lzhang/tiny_megvii/annotations/tiny_train.json'
+    # path = '/home/yz/cde/ProposalYOLO/data/tiny_megvii/labels/train/'
+    # json2txt(annotation_file, path)
+
+    # txt_path = '/home/yz/cde/ProposalYOLO/data/tiny_megvii/labels/train/'
+    # src_path = '/home/yz/cde/ProposalYOLO/data/megvii/images/train/'
+    # dst_path = '/home/yz/cde/ProposalYOLO/data/tiny_megvii/images/train/'
+    # copy(txt_path, src_path, dst_path)
+
+    # txt_path = '/home/yz/cde/ProposalYOLO/data/tiny_megvii/labels/val/'
+    # src_path = '/home/yz/cde/ProposalYOLO/data/megvii/images/val/'
+    # dst_path = '/home/yz/cde/ProposalYOLO/data/tiny_megvii/images/val/'
+    # copy(txt_path, src_path, dst_path)
+
+    annotation_file = '/media/data1/lzhang/tiny_megvii/annotations/tiny_val.json'
+    names(annotation_file, '/home/yz/cde/ProposalYOLO/data/tiny_megvii/megvii.names')
 
 
