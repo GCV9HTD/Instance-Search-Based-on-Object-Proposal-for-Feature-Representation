@@ -40,6 +40,24 @@ class ToTensor(object):
         return {'image': torch.from_numpy(image), 'label': torch.from_numpy(filled_labels)}
 
 
+class ToTensorX(object):
+    def __init__(self, max_objects=50, is_debug=False):
+        self.max_objects = max_objects
+        self.is_debug = is_debug
+
+    def __call__(self, sample):
+        image, labels = sample['image'], sample['label']
+        if not self.is_debug:
+            image = image.astype(np.float32)
+            image /= 255.0
+            image = np.transpose(image, (2, 0, 1))  # channel first
+            image = image.astype(np.float32)
+
+        filled_labels = np.zeros((self.max_objects, 5), np.float32)
+        filled_labels[range(len(labels))[:self.max_objects]] = labels[:self.max_objects]
+        return {'image': torch.from_numpy(image), 'label': torch.from_numpy(filled_labels)}
+
+
 class KeepAspect(object):
     def __init__(self):
         pass
