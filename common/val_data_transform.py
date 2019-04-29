@@ -54,7 +54,15 @@ class ToTensorX(object):
 
         filled_labels = np.zeros((self.max_objects, 5), np.float32)
         filled_labels[range(len(labels))[:self.max_objects]] = labels[:self.max_objects]
-        return {'image': torch.from_numpy(image), 'label': torch.from_numpy(filled_labels)}
+        # return {'image': torch.from_numpy(image), 'label': torch.from_numpy(filled_labels)}  # for Visualization
+
+        # Megvii
+        from torchvision.transforms import transforms
+        normalize = transforms.Normalize(mean=[0.464176, 0.433969, 0.396639], std=[0.118937, 0.121424, 0.135498])
+        image = torch.from_numpy(image)
+        image = normalize(image)
+
+        return {'image': image, 'label': torch.from_numpy(filled_labels)}
 
 
 class KeepAspect(object):
