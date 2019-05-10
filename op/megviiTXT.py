@@ -1,3 +1,5 @@
+from __future__ import division
+
 import os
 import cv2
 import json
@@ -49,14 +51,22 @@ def json2txt(annotation_file, path):
 
         cate_id = itm[u'category_id']
 
-        bbox[0] += bbox[2] / 2
-        bbox[1] += bbox[3] / 2
+        if bbox[0] + bbox[2] >= imgs[idx][2]:
+            bbox[2] = imgs[idx][2] - bbox[0] - 2  # make sure the bbox isn't outside of the image
 
-        bbox[0] = bbox[0] / imgs[idx][2]
-        bbox[1] = bbox[1] / imgs[idx][1]
-        bbox[2] = bbox[2] / imgs[idx][2]
-        bbox[3] = bbox[3] / imgs[idx][1]
+        if bbox[1] + bbox[3] >= imgs[idx][1]:
+            bbox[3] = imgs[idx][1] - bbox[1] - 2  # move 2 pixels
 
+        bbox[0] += bbox[2] / 2.0
+        bbox[1] += bbox[3] / 2.0
+
+        bbox[0] = bbox[0] / float(imgs[idx][2])
+        bbox[1] = bbox[1] / float(imgs[idx][1])
+        bbox[2] = bbox[2] / float(imgs[idx][2])
+        bbox[3] = bbox[3] / float(imgs[idx][1])
+
+        assert cate_id - 1 >= 0
+        assert cate_id - 1 < 65
         bbox.insert(0, cate_id - 1)  # such that index starts from 0
         imgs[idx].append(bbox)
 
@@ -112,10 +122,10 @@ def check():
                 for box in bbox:
                     box = box.split(' ')[1:5]
                     box = [float(cord) for cord in box]
-                    x1 = box[0] - box[2] / 2
-                    x2 = box[0] + box[2] / 2
-                    y1 = box[1] - box[3] / 2
-                    y2 = box[1] + box[3] / 2
+                    x1 = box[0] - box[2] / 2.0
+                    x2 = box[0] + box[2] / 2.0
+                    y1 = box[1] - box[3] / 2.0
+                    y2 = box[1] + box[3] / 2.0
                     x1 *= width
                     x2 *= width
                     y1 *= height
@@ -146,42 +156,60 @@ def copy(txt_path, src_path, dst_path):
         os.symlink(src_file, dst_file)
 
 
+def txt(img_dir, txt_file):
+    imgs = os.listdir(img_dir)
+    imgs.sort()
+    strm = open(txt_file, 'w')
+    for img in imgs:
+        strm.write('%s\n' % os.path.join(img_dir, img))
+
+    strm.close()
+
+
+def xtxt(label_dir, txt_file):
+    imgs = os.listdir(label_dir)
+    imgs.sort()
+    strm = open(txt_file, 'w')
+    for img in imgs:
+        # strm.write('%s\n' % os.path.join(label_dir, img.replace('txt', 'jpg'))) # COCO
+        fn = os.path.join(label_dir.replace('labels', 'images'), img.replace('txt', 'jpg'))
+        strm.write('%s\n' % fn)  # Megvii
+
+    strm.close()
+
+
 if __name__ == "__main__":
 
-    # Megvii
-    # annotation_file = '/home/yz/cde/ProposalYOLO/data/megvii/val.json'
-    # path = '/home/yz/cde/ProposalYOLO/data/megvii/labels/val/'
-    # json2txt(annotation_file, path)
-    #
-    # annotation_file = '/home/yz/cde/ProposalYOLO/data/megvii/train.json'
-    # path = '/home/yz/cde/ProposalYOLO/data/megvii/labels/train/'
-    # json2txt(annotation_file, path)
+    # # Tiny Megvii
+    annotation_file = '/media/data1/lzhang/tiny_megvii/annotations/tiny_val.json'
+    path = '/home/yz/cde/ProposalYOLO/data/tiny_megvii/labels/valid/'
+    json2txt(annotation_file, path)
 
-    # annotation_file = '/home/yz/cde/ProposalYOLO/data/megvii/val.json'
-    # names(annotation_file, '/home/yz/cde/ProposalYOLO/data/megvii/megvii.names')
+    annotation_file = '/media/data1/lzhang/tiny_megvii/annotations/tiny_train.json'
+    path = '/home/yz/cde/ProposalYOLO/data/tiny_megvii/labels/train/'
+    json2txt(annotation_file, path)
 
-    # check()
+    txt_path = '/home/yz/cde/ProposalYOLO/data/tiny_megvii/labels/valid/'
+    src_path = '/home/yz/cde/ProposalYOLO/data/megvii/images/val/'
+    dst_path = '/home/yz/cde/ProposalYOLO/data/tiny_megvii/images/valid/'
+    copy(txt_path, src_path, dst_path)
 
-    # Tiny Megvii
-    # annotation_file = '/media/data1/lzhang/tiny_megvii/annotations/tiny_val.json'
-    # path = '/home/yz/cde/ProposalYOLO/data/tiny_megvii/labels/val/'
-    # json2txt(annotation_file, path)
-
-    # annotation_file = '/media/data1/lzhang/tiny_megvii/annotations/tiny_train.json'
-    # path = '/home/yz/cde/ProposalYOLO/data/tiny_megvii/labels/train/'
-    # json2txt(annotation_file, path)
-
-    # txt_path = '/home/yz/cde/ProposalYOLO/data/tiny_megvii/labels/train/'
-    # src_path = '/home/yz/cde/ProposalYOLO/data/megvii/images/train/'
-    # dst_path = '/home/yz/cde/ProposalYOLO/data/tiny_megvii/images/train/'
-    # copy(txt_path, src_path, dst_path)
-
-    # txt_path = '/home/yz/cde/ProposalYOLO/data/tiny_megvii/labels/val/'
-    # src_path = '/home/yz/cde/ProposalYOLO/data/megvii/images/val/'
-    # dst_path = '/home/yz/cde/ProposalYOLO/data/tiny_megvii/images/val/'
-    # copy(txt_path, src_path, dst_path)
+    txt_path = '/home/yz/cde/ProposalYOLO/data/tiny_megvii/labels/train/'
+    src_path = '/home/yz/cde/ProposalYOLO/data/megvii/images/train/'
+    dst_path = '/home/yz/cde/ProposalYOLO/data/tiny_megvii/images/train/'
+    copy(txt_path, src_path, dst_path)
 
     annotation_file = '/media/data1/lzhang/tiny_megvii/annotations/tiny_val.json'
-    names(annotation_file, '/home/yz/cde/ProposalYOLO/data/tiny_megvii/megvii.names')
+    names(annotation_file, '/home/yz/cde/ProposalYOLO/data/tiny_megvii/tiny.names')
 
+    label_dir = '/home/yz/cde/ProposalYOLO/data/tiny_megvii/labels/valid/'
+    txt_file = '/home/yz/cde/ProposalYOLO/data/tiny_megvii/valid.txt'
+    xtxt(label_dir, txt_file)
+
+    label_dir = '/home/yz/cde/ProposalYOLO/data/tiny_megvii/labels/train/'
+    txt_file = '/home/yz/cde/ProposalYOLO/data/tiny_megvii/train.txt'
+    xtxt(label_dir, txt_file)
+
+    # Visualization
+    # check()
 
