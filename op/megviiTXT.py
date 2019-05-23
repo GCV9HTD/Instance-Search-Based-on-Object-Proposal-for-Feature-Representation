@@ -65,9 +65,12 @@ def json2txt(annotation_file, path):
         bbox[2] = bbox[2] / float(imgs[idx][2])
         bbox[3] = bbox[3] / float(imgs[idx][1])
 
-        assert cate_id - 1 >= 0
-        assert cate_id - 1 < 65
-        bbox.insert(0, cate_id - 1)  # such that index starts from 0
+        # cate_id = cate_id - 1
+        cate_id = cate_id - 301  # starts from 301
+
+        assert cate_id > -1
+        assert cate_id < 65
+        bbox.insert(0, cate_id)  # such that index starts from 0
         imgs[idx].append(bbox)
 
     for i in range(len(imgs)):
@@ -87,11 +90,18 @@ def names(annotation_file, file):
     cate = dataset['categories']
     maps = dict()
 
+    # for i in range(len(cate)):
+    #     maps[cate[i][u'id']] = cate[i][u'name']
+    # strm = open(file, 'w')
+    # for i in range(len(cate)):
+    #     strm.write('%s\n' % maps[i+1])
+
     for i in range(len(cate)):
-        maps[cate[i][u'id']] = cate[i][u'name'].encode("utf-8")
+        maps[cate[i][u'id'] - 301] = cate[i][u'name']  # starts from 301
     strm = open(file, 'w')
     for i in range(len(cate)):
-        strm.write('%s\n' % maps[i+1])
+        strm.write('%s\n' % maps[i])
+
     strm.close()
 
 def check():
@@ -181,35 +191,63 @@ def xtxt(label_dir, txt_file):
 if __name__ == "__main__":
 
     # # Tiny Megvii
-    annotation_file = '/media/data1/lzhang/tiny_megvii/annotations/tiny_val.json'
-    path = '/home/yz/cde/ProposalYOLO/data/tiny_megvii/labels/valid/'
-    json2txt(annotation_file, path)
-
-    annotation_file = '/media/data1/lzhang/tiny_megvii/annotations/tiny_train.json'
-    path = '/home/yz/cde/ProposalYOLO/data/tiny_megvii/labels/train/'
-    json2txt(annotation_file, path)
-
-    txt_path = '/home/yz/cde/ProposalYOLO/data/tiny_megvii/labels/valid/'
-    src_path = '/home/yz/cde/ProposalYOLO/data/megvii/images/val/'
-    dst_path = '/home/yz/cde/ProposalYOLO/data/tiny_megvii/images/valid/'
-    copy(txt_path, src_path, dst_path)
-
-    txt_path = '/home/yz/cde/ProposalYOLO/data/tiny_megvii/labels/train/'
-    src_path = '/home/yz/cde/ProposalYOLO/data/megvii/images/train/'
-    dst_path = '/home/yz/cde/ProposalYOLO/data/tiny_megvii/images/train/'
-    copy(txt_path, src_path, dst_path)
-
-    annotation_file = '/media/data1/lzhang/tiny_megvii/annotations/tiny_val.json'
-    names(annotation_file, '/home/yz/cde/ProposalYOLO/data/tiny_megvii/tiny.names')
-
-    label_dir = '/home/yz/cde/ProposalYOLO/data/tiny_megvii/labels/valid/'
-    txt_file = '/home/yz/cde/ProposalYOLO/data/tiny_megvii/valid.txt'
-    xtxt(label_dir, txt_file)
-
-    label_dir = '/home/yz/cde/ProposalYOLO/data/tiny_megvii/labels/train/'
-    txt_file = '/home/yz/cde/ProposalYOLO/data/tiny_megvii/train.txt'
-    xtxt(label_dir, txt_file)
+    # annotation_file = '/media/data1/lzhang/tiny_megvii/annotations/tiny_val.json'
+    # path = '/home/yz/cde/ProposalYOLO/data/tiny_megvii/labels/valid/'
+    # json2txt(annotation_file, path)
+    #
+    # annotation_file = '/media/data1/lzhang/tiny_megvii/annotations/tiny_train.json'
+    # path = '/home/yz/cde/ProposalYOLO/data/tiny_megvii/labels/train/'
+    # json2txt(annotation_file, path)
+    #
+    # txt_path = '/home/yz/cde/ProposalYOLO/data/tiny_megvii/labels/valid/'
+    # src_path = '/home/yz/cde/ProposalYOLO/data/megvii/images/val/'
+    # dst_path = '/home/yz/cde/ProposalYOLO/data/tiny_megvii/images/valid/'
+    # copy(txt_path, src_path, dst_path)
+    #
+    # txt_path = '/home/yz/cde/ProposalYOLO/data/tiny_megvii/labels/train/'
+    # src_path = '/home/yz/cde/ProposalYOLO/data/megvii/images/train/'
+    # dst_path = '/home/yz/cde/ProposalYOLO/data/tiny_megvii/images/train/'
+    # copy(txt_path, src_path, dst_path)
+    #
+    # annotation_file = '/media/data1/lzhang/tiny_megvii/annotations/tiny_val.json'
+    # names(annotation_file, '/home/yz/cde/ProposalYOLO/data/tiny_megvii/tiny.names')
+    #
+    # label_dir = '/home/yz/cde/ProposalYOLO/data/tiny_megvii/labels/valid/'
+    # txt_file = '/home/yz/cde/ProposalYOLO/data/tiny_megvii/valid.txt'
+    # xtxt(label_dir, txt_file)
+    #
+    # label_dir = '/home/yz/cde/ProposalYOLO/data/tiny_megvii/labels/train/'
+    # txt_file = '/home/yz/cde/ProposalYOLO/data/tiny_megvii/train.txt'
+    # xtxt(label_dir, txt_file)
 
     # Visualization
     # check()
 
+    annotation_file = '/media/data1/lzhang/object365_tiny/annotations/val.json'
+    path = '/home/yz/cde/ProposalYOLO/data/TinyTrack/labels/valid/'
+    json2txt(annotation_file, path)
+
+    annotation_file = '/media/data1/lzhang/object365_tiny/annotations/train.json'
+    path = '/home/yz/cde/ProposalYOLO/data/TinyTrack/labels/train/'
+    json2txt(annotation_file, path)
+
+    txt_path = '/home/yz/cde/ProposalYOLO/data/TinyTrack/labels/valid/'
+    src_path = '/home/yz/cde/ProposalYOLO/data/megvii/images/val/'
+    dst_path = '/home/yz/cde/ProposalYOLO/data/TinyTrack/images/valid/'
+    copy(txt_path, src_path, dst_path)
+
+    txt_path = '/home/yz/cde/ProposalYOLO/data/TinyTrack/labels/train/'
+    src_path = '/home/yz/cde/ProposalYOLO/data/megvii/images/train/'
+    dst_path = '/home/yz/cde/ProposalYOLO/data/TinyTrack/images/train/'
+    copy(txt_path, src_path, dst_path)
+
+    annotation_file = '/media/data1/lzhang/object365_tiny/annotations/val.json'
+    names(annotation_file, '/home/yz/cde/ProposalYOLO/data/TinyTrack/tiny.names')
+
+    label_dir = '/home/yz/cde/ProposalYOLO/data/TinyTrack/labels/valid/'
+    txt_file = '/home/yz/cde/ProposalYOLO/data/TinyTrack/valid.txt'
+    xtxt(label_dir, txt_file)
+
+    label_dir = '/home/yz/cde/ProposalYOLO/data/TinyTrack/labels/train/'
+    txt_file = '/home/yz/cde/ProposalYOLO/data/TinyTrack/train.txt'
+    xtxt(label_dir, txt_file)
